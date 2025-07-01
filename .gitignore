@@ -1,0 +1,14 @@
+# Dependency directories
+node_modules/
+node_modules/*
+
+# Error Files
+*.log
+logs/
+
+# IDE settings
+.idea
+
+# Environment files
+.env
+.env.*
