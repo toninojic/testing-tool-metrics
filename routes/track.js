@@ -6,7 +6,19 @@ const { RedisService } = require('../util/RedisService');
  * Update metric inside Redis
  */
 router.post('/track', async (req, res) => {
-    const { clientName, testID, variation } = req.body;
+    const { 
+        url: REQUESTED_URL,
+        testID, 
+        variation 
+    } = req.body;
+
+    let clientName;
+    try {
+        const urlObj = new URL(REQUESTED_URL);
+        clientName = urlObj.hostname.split('.')[0];
+    } catch (e) {
+        return res.status(400).json({ error: 'Invalid URL provided' });
+    }
 
     if (!clientName || !testID || !variation) {
         return res.status(400).json({ message: 'Missing required fields' });
