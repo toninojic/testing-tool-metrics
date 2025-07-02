@@ -34,18 +34,21 @@ class RedisService {
             const keys = await redisClient.keys('*:*:*');
             if (!keys.length) return [];
 
-            const pipeline = redisClient.multi();
-            keys.forEach(key => pipeline.get(key));
-            const values = await pipeline.exec();
+            const multi = redisClient.multi();
+            keys.forEach(key => multi.get(key));
+            const results = await multi.exec();
 
-            return keys.map((key, i) => ({
-                key,
-                count: parseInt(values[i][1], 10) || 0
-            }));
+            return keys.map((key, i) => {
+                const val = results[i];
+                const count = parseInt(val, 10);
+                return {
+                    key,
+                    count: isNaN(count) ? 0 : count
+                };
+            });
+
         } catch (error) {
-            if (enviromentVar === 'develop') {
-                console.error("Redis getAllCounts error:", error);
-            }
+            console.error("Redis getAllCounts error:", error);
             return [];
         }
     }

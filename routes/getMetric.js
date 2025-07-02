@@ -7,6 +7,7 @@ const { MongoService } = require('../util/MongoService');
  */
 router.get('/get-metric', async (req, res) => {
     const clientName = req.query.clientName;
+    const testID = req.query.testID;
 
     if (!clientName) {
         return res.status(400).json({ message: 'Missing clientName in query params' });
@@ -19,7 +20,21 @@ router.get('/get-metric', async (req, res) => {
             return res.status(404).json({ message: 'No metrics found for client' });
         }
 
+        if (testID) {
+            const testMetrics = metrics.tests?.[testID];
+            if (!testMetrics) {
+                return res.status(404).json({ message: `No metrics found for testID ${testID}` });
+            }
+
+            return res.status(200).json({
+                clientName,
+                testID,
+                metrics: testMetrics
+            });
+        }
+
         res.status(200).json({ clientName, tests: metrics.tests });
+
     } catch (error) {
         console.error(`Error fetching metrics for ${clientName}:`, error);
         res.status(500).json({ message: 'Error fetching metrics' });
